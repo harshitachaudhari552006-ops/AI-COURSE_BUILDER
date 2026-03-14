@@ -62,24 +62,47 @@ app.use('/api/ai', aiRoutes);
 
 // Static files (Serve frontend build)
 const frontendPath = path.resolve(__dirname, '../../frontend');
-const frontendDistPath = path.join(frontendPath, 'dist');
+let frontendDistPath = path.join(frontendPath, 'dist');
 
-console.log('📂 Debug: Current __dirname:', __dirname);
-console.log('📂 Debug: Frontend path:', frontendPath);
-if (fs.existsSync(frontendPath)) {
-  console.log('📂 Debug: Frontend dir contents:', fs.readdirSync(frontendPath));
-} else {
-  console.log('❌ Debug: Frontend dir NOT FOUND');
+console.log('📂 Deployment Diagnostic Info:');
+console.log('   - Current __dirname:', __dirname);
+console.log('   - Checking Default Path:', frontendDistPath);
+
+if (!fs.existsSync(frontendDistPath)) {
+  console.log('   ⚠️ Default dist folder MISSING. Searching for alternatives...');
+  // Try to find if it was built in the root or other common places
+  const alternatives = [
+    path.resolve(__dirname, '../../../frontend/dist'),
+    path.resolve(__dirname, '../frontend/dist'),
+    path.resolve(__dirname, '../../dist')
+  ];
+  
+  for (const alt of alternatives) {
+    if (fs.existsSync(alt)) {
+      console.log('   ✅ Found alternative dist path:', alt);
+      frontendDistPath = alt;
+      break;
+    }
+  }
 }
 
-console.log('📂 Frontend static files path:', frontendDistPath);
 if (fs.existsSync(frontendDistPath)) {
-  console.log('✅ Debug: dist folder exists');
+  console.log('   ✅ Serving frontend from:', frontendDistPath);
+  console.log('   📦 Contents:', fs.readdirSync(frontendDistPath).join(', '));
+  app.use(express.static(frontendDistPath));
 } else {
-  console.log('❌ Debug: dist folder MISSING');
+  console.log('   ❌ CRITICAL: No frontend dist folder found in any known location.');
+  // List parent directories to help debug
+  try {
+     const rootPath = path.resolve(__dirname, '../..');
+     console.log('   📂 Root Directory contents:', fs.readdirSync(rootPath).join(', '));
+     if (fs.existsSync(path.join(rootPath, 'frontend'))) {
+       console.log('   📂 Frontend Directory contents:', fs.readdirSync(path.join(rootPath, 'frontend')).join(', '));
+     }
+  } catch (e) {
+     console.log('   Unable to list directories:', e.message);
+  }
 }
-
-app.use(express.static(frontendDistPath));
 
 // Fallback for SPA (Single Page Application)
 app.get('*', (req, res) => {
