@@ -49,10 +49,6 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// Root route
-app.get('/', (req, res) => {
-  res.json({ message: 'AI Course Builder API is running' });
-});
 
 // Routes
 app.use('/api/auth', authRoutes);

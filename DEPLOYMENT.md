@@ -11,13 +11,16 @@
 4. Add environment variables
 5. Deploy automatically
 
-#### Option 2: Render
+#### Option 2: Render (Recommended for Monorepo)
 1. Sign up at [Render](https://render.com)
 2. Create new Web Service
 3. Connect repository
-4. Set build command: `npm install`
+4. Set build command: `npm run build`
 5. Set start command: `npm start`
-6. Add environment variables
+6. Add environment variables:
+   - `MONGODB_URI`: Your MongoDB Atlas connection string
+   - `GEMINI_API_KEY`: Your Google AI key
+   - `VITE_API_URL`: Set this to your own Render URL (e.g., `https://ai-course-builder-ycts.onrender.com/api`)
 
 #### Option 3: Heroku
 1. Install Heroku CLI
