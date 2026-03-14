@@ -7,6 +7,11 @@ import cors from 'cors';
 import connectDB from './config/database.js';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -57,6 +62,16 @@ app.use('/api/modules', moduleRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/question-papers', questionPaperRoutes);
 app.use('/api/ai', aiRoutes);
+
+// Static files (Serve frontend build)
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendDistPath));
+
+// Fallback for SPA (Single Page Application)
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) return res.status(404).json({ message: 'API Route not found' });
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
