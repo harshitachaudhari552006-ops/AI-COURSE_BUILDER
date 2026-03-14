@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,8 +61,24 @@ app.use('/api/question-papers', questionPaperRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Static files (Serve frontend build)
-const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+const frontendPath = path.resolve(__dirname, '../../frontend');
+const frontendDistPath = path.join(frontendPath, 'dist');
+
+console.log('📂 Debug: Current __dirname:', __dirname);
+console.log('📂 Debug: Frontend path:', frontendPath);
+if (fs.existsSync(frontendPath)) {
+  console.log('📂 Debug: Frontend dir contents:', fs.readdirSync(frontendPath));
+} else {
+  console.log('❌ Debug: Frontend dir NOT FOUND');
+}
+
 console.log('📂 Frontend static files path:', frontendDistPath);
+if (fs.existsSync(frontendDistPath)) {
+  console.log('✅ Debug: dist folder exists');
+} else {
+  console.log('❌ Debug: dist folder MISSING');
+}
+
 app.use(express.static(frontendDistPath));
 
 // Fallback for SPA (Single Page Application)
