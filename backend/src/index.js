@@ -60,7 +60,8 @@ app.use('/api/question-papers', questionPaperRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Static files (Serve frontend build)
-const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+console.log('📂 Frontend static files path:', frontendDistPath);
 app.use(express.static(frontendDistPath));
 
 // Fallback for SPA (Single Page Application)
