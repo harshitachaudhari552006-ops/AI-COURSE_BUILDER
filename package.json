@@ -3,10 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "install-all": "npm install --prefix backend && npm install --prefix frontend",
-    "backend-start": "npm start --prefix backend",
-    "frontend-build": "npm run build --prefix frontend",
-    "start": "npm run backend-start"
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/src/index.js"
   },
   "engines": {
     "node": ">=18.0.0"
