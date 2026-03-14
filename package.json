@@ -7,7 +7,7 @@
     "frontend"
   ],
   "scripts": {
-    "build": "npm install --include=dev && npm run build --workspace=frontend",
+    "build": "npm install --include=dev && npm run build --workspace=frontend && echo '✅ Build complete. Checking dist folder...' && ls -R frontend/dist || echo '❌ dist folder NOT FOUND after build'",
     "start": "npm start --workspace=backend"
   },
   "engines": {
