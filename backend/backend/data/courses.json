@@ -1,0 +1,163 @@
+[
+  {
+    "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f",
+    "topic": "Data analytics",
+    "level": "Beginner",
+    "audience": "Students",
+    "durationWeeks": 4,
+    "modules": [
+      {
+        "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-1",
+        "title": "Data analytics Module 1: Beginner essentials",
+        "summary": "Focus on Data analytics for Students learners at Beginner depth.",
+        "lessons": [
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-1-lesson-1",
+            "title": "Lesson 1: Data analytics concept 1",
+            "activity": "pairing",
+            "assessment": "quiz"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-1-lesson-2",
+            "title": "Lesson 2: Data analytics concept 2",
+            "activity": "guided-reading",
+            "assessment": "mini-project"
+          }
+        ]
+      },
+      {
+        "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-2",
+        "title": "Data analytics Module 2: Beginner essentials",
+        "summary": "Focus on Data analytics for Students learners at Beginner depth.",
+        "lessons": [
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-2-lesson-1",
+            "title": "Lesson 1: Data analytics concept 1",
+            "activity": "guided-reading",
+            "assessment": "peer-review"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-2-lesson-2",
+            "title": "Lesson 2: Data analytics concept 2",
+            "activity": "project-first",
+            "assessment": "quiz"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-2-lesson-3",
+            "title": "Lesson 3: Data analytics concept 3",
+            "activity": "hands-on",
+            "assessment": "mini-project"
+          }
+        ]
+      },
+      {
+        "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-3",
+        "title": "Data analytics Module 3: Beginner essentials",
+        "summary": "Focus on Data analytics for Students learners at Beginner depth.",
+        "lessons": [
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-3-lesson-1",
+            "title": "Lesson 1: Data analytics concept 1",
+            "activity": "project-first",
+            "assessment": "reflection"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-3-lesson-2",
+            "title": "Lesson 2: Data analytics concept 2",
+            "activity": "hands-on",
+            "assessment": "peer-review"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-3-lesson-3",
+            "title": "Lesson 3: Data analytics concept 3",
+            "activity": "theory-with-labs",
+            "assessment": "quiz"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-3-lesson-4",
+            "title": "Lesson 4: Data analytics concept 4",
+            "activity": "pairing",
+            "assessment": "mini-project"
+          }
+        ]
+      },
+      {
+        "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-4",
+        "title": "Data analytics Module 4: Beginner essentials",
+        "summary": "Focus on Data analytics for Students learners at Beginner depth.",
+        "lessons": [
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-4-lesson-1",
+            "title": "Lesson 1: Data analytics concept 1",
+            "activity": "hands-on",
+            "assessment": "mini-project"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-4-lesson-2",
+            "title": "Lesson 2: Data analytics concept 2",
+            "activity": "theory-with-labs",
+            "assessment": "reflection"
+          }
+        ]
+      },
+      {
+        "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-5",
+        "title": "Data analytics Module 5: Beginner essentials",
+        "summary": "Focus on Data analytics for Students learners at Beginner depth.",
+        "lessons": [
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-5-lesson-1",
+            "title": "Lesson 1: Data analytics concept 1",
+            "activity": "theory-with-labs",
+            "assessment": "quiz"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-5-lesson-2",
+            "title": "Lesson 2: Data analytics concept 2",
+            "activity": "pairing",
+            "assessment": "mini-project"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-5-lesson-3",
+            "title": "Lesson 3: Data analytics concept 3",
+            "activity": "guided-reading",
+            "assessment": "reflection"
+          }
+        ]
+      },
+      {
+        "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-6",
+        "title": "Data analytics Module 6: Beginner essentials",
+        "summary": "Focus on Data analytics for Students learners at Beginner depth.",
+        "lessons": [
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-6-lesson-1",
+            "title": "Lesson 1: Data analytics concept 1",
+            "activity": "pairing",
+            "assessment": "peer-review"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-6-lesson-2",
+            "title": "Lesson 2: Data analytics concept 2",
+            "activity": "guided-reading",
+            "assessment": "quiz"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-6-lesson-3",
+            "title": "Lesson 3: Data analytics concept 3",
+            "activity": "project-first",
+            "assessment": "mini-project"
+          },
+          {
+            "id": "f7aae042-da88-4f5e-b67f-d610987f2d0f-mod-6-lesson-4",
+            "title": "Lesson 4: Data analytics concept 4",
+            "activity": "hands-on",
+            "assessment": "reflection"
+          }
+        ]
+      }
+    ],
+    "createdAt": "2025-12-15T18:17:04.221Z",
+    "summary": "Auto-generated Beginner course on Data analytics tailored for Students, lasting 4 weeks with 6 modules."
+  }
+]
