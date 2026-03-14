@@ -2,9 +2,13 @@
   "name": "ai-course-builder-monorepo",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
-    "start": "node backend/src/index.js"
+    "build": "npm install && npm run build -w frontend",
+    "start": "npm start -w backend"
   },
   "engines": {
     "node": ">=18.0.0"
