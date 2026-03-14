@@ -107,7 +107,31 @@ if (fs.existsSync(frontendDistPath)) {
 // Fallback for SPA (Single Page Application)
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api')) return res.status(404).json({ message: 'API Route not found' });
-  res.sendFile(path.join(frontendDistPath, 'index.html'));
+  
+  const indexPath = path.join(frontendDistPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  
+  // ⚠️ Graceful Fallback for missing build
+  res.status(200).send(`
+    <html>
+      <head><title>Setup in Progress</title></head>
+      <body style="font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f4f4f9; color: #333; text-align: center; padding: 20px;">
+        <h1 style="color: #4a90e2;">🚀 Backend is Ready!</h1>
+        <p style="font-size: 1.1rem; max-width: 600px;">The server is live, but your <b>Frontend Login Screen</b> is still being built or was blocked by a setup error.</p>
+        <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 20px;">
+          <h3 style="margin-top: 0;">How to fix this on Render:</h3>
+          <ul style="text-align: left; line-height: 1.6;">
+            <li>Go to <b>Manual Deploy</b> -> <b>Clear Build Cache & Deploy</b>.</li>
+            <li>Ensure your Build Command is: <code>npm run build</code></li>
+            <li>Verify you have added <code>MONGODB_URI</code> in environment variables.</li>
+          </ul>
+        </div>
+        <p style="margin-top: 20px; color: #777;">Refreshing this page in 2-3 minutes usually solves it.</p>
+      </body>
+    </html>
+  `);
 });
 
 // Error handling middleware
