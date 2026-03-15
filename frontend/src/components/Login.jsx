@@ -95,7 +95,7 @@ const Login = () => {
 
             <div className="form-group">
               <label>
-                <FiPhone /> Mobile (Optional)
+                <FiPhone /> Mobile
               </label>
               <input
                 type="tel"
