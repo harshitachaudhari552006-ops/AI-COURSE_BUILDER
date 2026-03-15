@@ -75,7 +75,7 @@ const autoLinkQuestionPapers = async () => {
           'AM-III': 'EM3',
           'EM-3': 'EM3',
           'EM-4': 'EM4',
-          'DAV': 'DVA',
+          'DAV': 'DAV',
           'SAIDS': 'SAIDS'
       };
       

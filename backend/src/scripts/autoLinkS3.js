@@ -82,7 +82,7 @@ const autoLinkS3 = async () => {
           'AM-III': 'EM3',
           'EM-3': 'EM3',
           'EM-4': 'EM4',
-          'DAV': 'DVA', // S3 DAV -> DB DVA
+          'DAV': 'DAV', // S3 DAV -> DB DAV
           'SAIDS': 'SAIDS'
       };
       

@@ -18,7 +18,7 @@ const Home = () => {
   const loadSemesters = async () => {
     try {
       const data = await fetchSemesters();
-      setSemesters(data);
+      setSemesters(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message);
     } finally {
