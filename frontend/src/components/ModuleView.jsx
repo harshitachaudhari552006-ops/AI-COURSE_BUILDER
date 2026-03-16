@@ -19,13 +19,13 @@ import ReactPlayer from 'react-player';
 const getYoutubeEmbedUrl = (url) => {
   if (!url) return null;
   try {
-    // Enhanced regex to catch Video ID from standard, shortened, shorts, and URLs with tracking parameters
     const regExp = /^.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/|live\/)([^#&?]*).*/;
     const match = url.match(regExp);
     const videoId = (match && match[1].length === 11) ? match[1] : null;
     
     if (videoId) {
-      return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+      const origin = encodeURIComponent(window.location.origin);
+      return `https://www.youtube.com/embed/${videoId}?rel=0&enablejsapi=1&origin=${origin}`;
     }
     return null;
   } catch (e) {
