@@ -16,6 +16,20 @@ import {
 import { FiArrowLeft, FiFileText, FiDownload, FiSearch, FiYoutube, FiBook, FiZap, FiSend, FiPlus, FiTrash2, FiSave } from 'react-icons/fi';
 import ReactPlayer from 'react-player';
 
+const getYoutubeEmbedUrl = (url) => {
+  if (!url) return null;
+  try {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      return `https://www.youtube.com/embed/${match[2]}`;
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+};
+
 const ModuleView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -321,9 +335,26 @@ const ModuleView = () => {
           <div className="videos-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '30px' }}>
             {youtubeUrls.map((url, index) => (
               <div key={index} className="video-card" style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: 'var(--shadow)', position: 'relative' }}>
-                <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                <div style={{ position: 'relative', paddingTop: '56.25%', background: '#000' }}>
                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-                      <ReactPlayer url={url} width="100%" height="100%" controls={true} />
+                      {getYoutubeEmbedUrl(url) ? (
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={getYoutubeEmbedUrl(url)}
+                          title={`YouTube video ${index + 1}`}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <ReactPlayer 
+                          url={url} 
+                          width="100%" 
+                          height="100%" 
+                          controls={true}
+                        />
+                      )}
                    </div>
                 </div>
                 <div style={{ padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

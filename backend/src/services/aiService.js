@@ -153,6 +153,21 @@ const robustGenerateContent = async (feature, prompt, fallbackContent) => {
   return fallbackContent;
 };
 
+// HELPER: Format history for Gemini
+function formatGeminiHistory(history) {
+  // Gemini requires history to alternate user/model and start with user
+  return history
+    .map(h => ({
+      role: h.role === 'user' ? 'user' : 'model',
+      parts: [{ text: h.content }],
+    }))
+    .filter((h, idx, arr) => {
+      // Skip first message if it's from the model (Gemini requirement)
+      if (idx === 0 && h.role === 'model') return false;
+      return true;
+    });
+}
+
 // Generate extra notes using AI
 export const generateExtraNotes = async (moduleId, topic, officialNotes) => {
   try {
@@ -397,124 +412,102 @@ ${bestMatch}
 export const chatWithAI = async (moduleId, topic, question, history = []) => {
   try {
     const provider = getAIProvider('chat');
-    const gemini = chatGeminiClient;
-    const openai = chatOpenAIClient;
-
-    if (!provider) return await localSearchAnswer(moduleId, topic, question);
-
-    let answer = '';
+    const primaryGemini = chatGeminiClient;
+    const backupGemini = contentGeminiClient;
+    const openai = chatOpenAIClient || contentOpenAIClient;
 
     // Get context from existing AI content
     const context = await AIContent.findOne({ module: moduleId, topic });
     const contextText = context ? `
-Context Information:
+Context Information for Topic "${topic}":
 Notes: ${context.extraNotes || 'N/A'}
 Key Points: ${context.examPoints?.join(', ') || 'N/A'}
-` : '';
+` : 'No specific module notes found for this topic.';
 
-    if (provider === 'GEMINI' && gemini) {
-      const model = gemini.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-        ]
-      });
-      console.log('🤖 Using Gemini Model: gemini-1.5-flash');
+    const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro'];
+    const formattedHistory = formatGeminiHistory(history);
 
-      // Filter history: Gemini requires history to alternate user/model and start with user
-      const formattedHistory = history
-        .map(h => ({
-          role: h.role === 'user' ? 'user' : 'model',
-          parts: [{ text: h.content }],
-        }))
-        .filter((h, idx, arr) => {
-          // Skip first message if it's from the model (Gemini requirement)
-          if (idx === 0 && h.role === 'model') return false;
-          return true;
+    const prompt = `You are an expert engineering tutor. Answer the student's question about "${topic}" based on the module materials.
+    
+    CONTEXT FROM MODULE:
+    ${contextText}
+
+    Student's Question: ${question}
+
+    Provide a helpful, accurate, and conversational answer. Use Markdown formatting. If the answer isn't in the context, use your general engineering knowledge but mention it is supplementary.`;
+
+    const preferred = process.env.PREFERRED_AI_PROVIDER || 'GEMINI';
+
+    // 1. Try OpenAI if it's preferred
+    if (preferred === 'OPENAI' && openai) {
+      try {
+        const response = await openai.chat.completions.create({
+          model: getChatOpenAIModel(),
+          messages: [
+            { role: 'system', content: `You are an expert engineering tutor for topic ${topic}. Context: ${contextText}` },
+            ...history.map(h => ({ role: h.role === 'user' ? 'user' : 'assistant', content: h.content })),
+            { role: 'user', content: question }
+          ],
+          max_tokens: 1000,
         });
-
-      const chat = model.startChat({
-        history: formattedHistory,
-        generationConfig: {
-          maxOutputTokens: 1000,
-        },
-      });
-
-      const prompt = `You are an expert engineering tutor. Answer the student's question about the topic "${topic}" based strictly on the provided module materials.
-      
-      CONTEXT FROM MODULE:
-      ${contextText}
-
-      Student's Question: ${question}
-
-      Provide a helpful, accurate, and conversational answer using ONLY the context above or general engineering principles if directly related to the context. Use Markdown formatting.`;
-
-      const result = await chat.sendMessage(prompt);
-      answer = result.response.text();
-    } else if (provider === 'OPENAI' && openai) {
-      const messages = [
-        {
-          role: 'system',
-          content: `You are an expert engineering tutor. Assist the student with their questions about "${topic}" using the following notes: ${contextText || 'None'}.`,
-        },
-        ...history.map(msg => ({
-          role: msg.role,
-          content: msg.content,
-        })),
-        {
-          role: 'user',
-          content: question,
-        },
-      ];
-
-      const response = await openai.chat.completions.create({
-        model: getChatOpenAIModel(),
-        messages,
-        max_tokens: 1000,
-      });
-      answer = response.choices[0].message.content;
+        return response.choices[0].message.content;
+      } catch (e) {
+        console.warn('[CHAT] Preferred OpenAI failed');
+      }
     }
 
-    return answer;
-  } catch (error) {
-    console.error('AI Chat Error:', error);
-    
-    if (error.message?.includes('429') || error.message?.includes('Quota') || error.message?.includes('Limit') || error.message?.includes('403') || error.message?.includes('404') || error.status === 429) {
-      const allOpenAIClients = [chatOpenAIClient, contentOpenAIClient].filter(c => c !== null);
-      const allGeminiClients = [chatGeminiClient, contentGeminiClient].filter(c => c !== null);
-
-      for (const client of allOpenAIClients) {
+    // 2. Try Gemini Primary
+    if (primaryGemini) {
+      for (const modelName of models) {
         try {
-          const response = await client.chat.completions.create({
-            model: getChatOpenAIModel(),
-            messages: [
-              { role: 'system', content: `You are an expert engineering tutor. Answer about ${topic} based on the module.` },
-              ...history.map(m => ({ role: m.role, content: m.content })),
-              { role: 'user', content: question }
-            ],
-            max_tokens: 1000,
-          });
-          return response.choices[0].message.content;
-        } catch (e) { continue; }
-      }
-
-      const rescueModels = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro'];
-      for (const client of allGeminiClients) {
-        for (const modelName of rescueModels) {
-          try {
-            const rescueModel = client.getGenerativeModel({ model: modelName });
-            const result = await rescueModel.generateContent(`Answer student question about ${topic}: ${question}. Context: Engineering module.`);
-            if (result.response) return result.response.text();
-          } catch (e) { continue; }
+          const model = primaryGemini.getGenerativeModel({ model: modelName });
+          const chat = model.startChat({ history: formattedHistory });
+          const result = await chat.sendMessage(prompt);
+          if (result.response) return result.response.text();
+        } catch (e) {
+          console.warn(`[CHAT] Primary Gemini failed with ${modelName}: ${e.message}`);
         }
       }
     }
 
-    // Strategy 3: "AI-Style" Local Knowledge Rescue (Final fallback)
-    console.log('🚨 Google API is completely blocked (Limit: 0). Generating answer from local notes...');
+    // 3. Try OpenAI Fallback
+    if (preferred !== 'OPENAI' && openai) {
+      try {
+        const response = await openai.chat.completions.create({
+          model: getChatOpenAIModel(),
+          messages: [
+            { role: 'system', content: `You are an expert engineering tutor for topic ${topic}. Context: ${contextText}` },
+            ...history.map(h => ({ role: h.role === 'user' ? 'user' : 'assistant', content: h.content })),
+            { role: 'user', content: question }
+          ],
+          max_tokens: 1000,
+        });
+        return response.choices[0].message.content;
+      } catch (e) {
+        console.warn('[CHAT] Fallback OpenAI failed');
+      }
+    }
+
+    // 4. Try Gemini Backup
+    if (backupGemini && backupGemini !== primaryGemini) {
+      for (const modelName of models) {
+        try {
+          const model = backupGemini.getGenerativeModel({ model: modelName });
+          const chat = model.startChat({ history: formattedHistory });
+          const result = await chat.sendMessage(prompt);
+          if (result.response) return result.response.text();
+        } catch (e) {
+          console.warn(`[CHAT] Backup Gemini failed with ${modelName}: ${e.message}`);
+        }
+      }
+    }
+
+    // Still failing? Return local search
+    console.error("🚨 ALL CHAT AI PROVIDERS FAILED. Using local search.");
+    return await localSearchAnswer(moduleId, topic, question);
+
+  } catch (error) {
+    console.error('AI Chat Critical Error:', error);
     return await localSearchAnswer(moduleId, topic, question);
   }
 };
