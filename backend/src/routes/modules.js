@@ -43,5 +43,31 @@ router.get('/:id', authenticate, async (req, res) => {
   }
 });
 
+// Update module YouTube links
+router.put('/:id/youtube-links', authenticate, async (req, res) => {
+  try {
+    const { youtubeUrls } = req.body;
+    
+    if (!Array.isArray(youtubeUrls)) {
+      return res.status(400).json({ message: 'youtubeUrls must be an array' });
+    }
+
+    const module = await Module.findByIdAndUpdate(
+      req.params.id,
+      { youtubeUrls },
+      { new: true }
+    );
+
+    if (!module) {
+      return res.status(404).json({ message: 'Module not found' });
+    }
+
+    res.json(module);
+  } catch (error) {
+    console.error('Error updating module YouTube links:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
 

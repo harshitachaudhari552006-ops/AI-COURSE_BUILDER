@@ -11,8 +11,10 @@ import {
   generatePredictedQuestions,
   downloadMaterial,
   chatWithAI,
+  updateModuleYouTubeLinks,
 } from '../api';
-import { FiArrowLeft, FiFileText, FiDownload, FiSearch, FiYoutube, FiBook, FiZap, FiSend } from 'react-icons/fi';
+import { FiArrowLeft, FiFileText, FiDownload, FiSearch, FiYoutube, FiBook, FiZap, FiSend, FiPlus, FiTrash2, FiSave } from 'react-icons/fi';
+import ReactPlayer from 'react-player';
 
 const ModuleView = () => {
   const { id } = useParams();
@@ -25,6 +27,9 @@ const ModuleView = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeSection, setActiveSection] = useState('materials');
+  const [youtubeUrls, setYoutubeUrls] = useState([]);
+  const [isEditingLinks, setIsEditingLinks] = useState(false);
+  const [newUrl, setNewUrl] = useState('');
   
   // Chat state
   const [chatInput, setChatInput] = useState('');
@@ -51,6 +56,7 @@ const ModuleView = () => {
       ]);
       setModule(moduleData);
       setMaterials(materialsData);
+      setYoutubeUrls(moduleData.youtubeUrls || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -153,6 +159,36 @@ const ModuleView = () => {
     }
   };
 
+  const handleAddYoutubeLink = async () => {
+    if (!newUrl.trim()) return;
+    
+    const updatedUrls = [...youtubeUrls, newUrl.trim()];
+    try {
+      setLoading(true);
+      await updateModuleYouTubeLinks(id, updatedUrls);
+      setYoutubeUrls(updatedUrls);
+      setNewUrl('');
+      setIsEditingLinks(false);
+    } catch (err) {
+      setError('Failed to add video: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveYoutubeLink = async (index) => {
+    const updatedUrls = youtubeUrls.filter((_, i) => i !== index);
+    try {
+      setLoading(true);
+      await updateModuleYouTubeLinks(id, updatedUrls);
+      setYoutubeUrls(updatedUrls);
+    } catch (err) {
+      setError('Failed to remove video: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container">
@@ -201,6 +237,12 @@ const ModuleView = () => {
           <FiFileText /> Official Materials
         </button>
         <button
+          className={activeSection === 'videos' ? 'tab active' : 'tab'}
+          onClick={() => setActiveSection('videos')}
+        >
+          <FiYoutube /> Module Videos
+        </button>
+        <button
           className={activeSection === 'ai' ? 'tab active' : 'tab'}
           onClick={() => setActiveSection('ai')}
         >
@@ -240,6 +282,75 @@ const ModuleView = () => {
           {materials.length === 0 && (
             <div className="empty-state">
               <p>No materials available for this module.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Videos Section */}
+      {activeSection === 'videos' && (
+        <div className="videos-container">
+          <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2>Module Videos ({youtubeUrls.length})</h2>
+            <button 
+              className="btn btn-primary btn-sm"
+              onClick={() => setIsEditingLinks(!isEditingLinks)}
+            >
+              {isEditingLinks ? 'Cancel' : <><FiPlus /> Add Video</>}
+            </button>
+          </div>
+
+          {isEditingLinks && (
+            <div className="add-video-form" style={{ background: '#f8f9fa', padding: '20px', borderRadius: '10px', marginBottom: '30px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input
+                  type="text"
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                  placeholder="Paste YouTube video URL here..."
+                  style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }}
+                />
+                <button onClick={handleAddYoutubeLink} className="btn btn-primary">
+                  <FiSave /> Save Video
+                </button>
+              </div>
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>Example: https://www.youtube.com/watch?v=dQw4w9WgXcQ</p>
+            </div>
+          )}
+
+          <div className="videos-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '30px' }}>
+            {youtubeUrls.map((url, index) => (
+              <div key={index} className="video-card" style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: 'var(--shadow)', position: 'relative' }}>
+                <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                   <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                      <ReactPlayer url={url} width="100%" height="100%" controls={true} />
+                   </div>
+                </div>
+                <div style={{ padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '14px', color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>{url}</span>
+                  <button 
+                    onClick={() => handleRemoveYoutubeLink(index)} 
+                    style={{ color: '#ff4d4d', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    title="Remove Video"
+                  >
+                    <FiTrash2 />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {youtubeUrls.length === 0 && !isEditingLinks && (
+            <div className="empty-state">
+              <FiYoutube style={{ fontSize: '48px', color: '#ccc', marginBottom: '10px' }} />
+              <p>No videos have been added to this module yet.</p>
+              <button 
+                className="btn btn-primary" 
+                style={{ marginTop: '20px' }}
+                onClick={() => setIsEditingLinks(true)}
+              >
+                Add Your First Video
+              </button>
             </div>
           )}
         </div>

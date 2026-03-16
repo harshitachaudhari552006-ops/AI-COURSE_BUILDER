@@ -100,6 +100,15 @@ export const fetchModule = async (id) => {
   }
 };
 
+export const updateModuleYouTubeLinks = async (id, youtubeUrls) => {
+  try {
+    const res = await api.put(`/modules/${id}/youtube-links`, { youtubeUrls });
+    return res.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
 // Material APIs
 export const fetchMaterials = async (moduleId) => {
   try {

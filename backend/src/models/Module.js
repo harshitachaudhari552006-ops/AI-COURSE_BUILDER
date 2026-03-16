@@ -27,6 +27,10 @@ const moduleSchema = new mongoose.Schema({
     type: String,
     trim: true,
   }],
+  youtubeUrls: [{
+    type: String,
+    trim: true,
+  }],
 }, {
   timestamps: true,
 });
