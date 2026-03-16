@@ -39,6 +39,7 @@ app.use(helmet({
       "script-src": ["'self'", "'unsafe-inline'", "https://www.youtube.com", "https://s.ytimg.com"],
     },
   },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));

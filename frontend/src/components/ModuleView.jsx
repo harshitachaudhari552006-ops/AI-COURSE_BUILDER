@@ -24,8 +24,7 @@ const getYoutubeEmbedUrl = (url) => {
     const videoId = (match && match[1].length === 11) ? match[1] : null;
     
     if (videoId) {
-      const origin = encodeURIComponent(window.location.origin);
-      return `https://www.youtube.com/embed/${videoId}?rel=0&enablejsapi=1&origin=${origin}`;
+      return `https://www.youtube.com/embed/${videoId}?rel=0`;
     }
     return null;
   } catch (e) {
