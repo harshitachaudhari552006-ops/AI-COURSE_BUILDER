@@ -29,7 +29,17 @@ connectDB();
 const app = express();
 
 // Security middleware
-app.use(helmet());
+// Security middleware with CSP configuration for YouTube
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "frame-src": ["'self'", "https://www.youtube.com", "https://youtube.com"],
+      "img-src": ["'self'", "data:", "https://i.ytimg.com", "https://*.amazonaws.com"],
+      "script-src": ["'self'", "'unsafe-inline'", "https://www.youtube.com"],
+    },
+  },
+}));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
