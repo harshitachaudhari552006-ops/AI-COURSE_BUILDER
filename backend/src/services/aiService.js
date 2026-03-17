@@ -21,6 +21,23 @@ const getOpenAIModel = () =>
 const getChatOpenAIModel = () =>
   (process.env.CHAT_OPENAI_MODEL || '').trim() || getOpenAIModel();
 
+const summarizeProviderError = (e) => {
+  const status = e?.status ?? e?.response?.status;
+  const code = e?.code;
+  const message = e?.message || String(e);
+  const bodyMessage =
+    e?.response?.data?.error?.message ||
+    e?.response?.data?.message ||
+    e?.error?.message;
+
+  return {
+    status,
+    code,
+    message,
+    bodyMessage,
+  };
+};
+
 // Get AI provider based on preference and availability
 const getAIProvider = (feature = 'content') => {
   initializeClients();
@@ -364,48 +381,10 @@ export const getAIContent = async (moduleId, topic) => {
   }
 };
 
-// Local search functionality (kept but not used for automatic fallback anymore)
-const localSearchAnswer = async (moduleId, topic, question) => {
-  try {
-    const context = await AIContent.findOne({ module: moduleId, topic });
-    if (!context) {
-      return "I'm currently in Offline Mode and I couldn't find any saved notes for this topic. Please try generating notes for this topic first by searching in the search bar above.";
-    }
-
-    const searchBuffer = [
-      ...(context.extraNotes ? [context.extraNotes] : []),
-      ...(context.examPoints || [])
-    ].join('\n\n');
-
-    const keywords = (question || "").toLowerCase().split(/\s+/).filter(w => w.length > 3);
-    const sentences = searchBuffer.split(/[.!?]\s+/);
-    
-    let bestMatch = "";
-    let maxKeywords = 0;
-
-    sentences.forEach(s => {
-      const matchCount = keywords.filter(k => s.toLowerCase().includes(k)).length;
-      if (matchCount > maxKeywords) {
-        maxKeywords = matchCount;
-        bestMatch = s;
-      }
-    });
-
-    if (bestMatch && maxKeywords > 0) {
-      return `📦 [AI RESCUE MODE] Hi! I'm your engineering tutor. Your question was: "${question}". 
-
-Based on the module material for "${topic}", here is the answer:
-
-${bestMatch}
-
---- 
-*(Note: I am currently generating this answer from your saved module notes because the AI API is currently hit with a quota or connectivity issue.)*`;
-    }
-
-    return `📦 [AI RESCUE MODE] I couldn't find a direct sentence for that question, but here is a summary from your "${topic}" notes: \n\n${context.extraNotes?.substring(0, 500)}...`;
-  } catch (err) {
-    return "The AI system is currently unavailable. Please check your API account status.";
-  }
+// Final fallback when ALL AI providers fail.
+// User requested: do NOT reference saved notes in chatbot answers.
+const localSearchAnswer = async (_moduleId, _topic, _question) => {
+  return "The AI provider is currently unavailable. Please check your API key / billing / model access, then try again.";
 };
 
 // Chat with AI about a module/topic
@@ -416,25 +395,15 @@ export const chatWithAI = async (moduleId, topic, question, history = []) => {
     const backupGemini = contentGeminiClient;
     const openai = chatOpenAIClient || contentOpenAIClient;
 
-    // Get context from existing AI content
-    const context = await AIContent.findOne({ module: moduleId, topic });
-    const contextText = context ? `
-Context Information for Topic "${topic}":
-Notes: ${context.extraNotes || 'N/A'}
-Key Points: ${context.examPoints?.join(', ') || 'N/A'}
-` : 'No specific module notes found for this topic.';
-
     const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro'];
     const formattedHistory = formatGeminiHistory(history);
 
-    const prompt = `You are an expert engineering tutor. Answer the student's question about "${topic}" based on the module materials.
-    
-    CONTEXT FROM MODULE:
-    ${contextText}
+    const prompt = `You are a helpful and accurate assistant. Answer the user's question clearly and conversationally.
 
-    Student's Question: ${question}
+Topic: ${topic}
+Question: ${question}
 
-    Provide a helpful, accurate, and conversational answer. Use Markdown formatting. If the answer isn't in the context, use your general engineering knowledge but mention it is supplementary.`;
+Use Markdown formatting for clarity when helpful.`;
 
     const preferred = process.env.PREFERRED_AI_PROVIDER || 'GEMINI';
 
@@ -444,7 +413,7 @@ Key Points: ${context.examPoints?.join(', ') || 'N/A'}
         const response = await openai.chat.completions.create({
           model: getChatOpenAIModel(),
           messages: [
-            { role: 'system', content: `You are an expert engineering tutor for topic ${topic}. Context: ${contextText}` },
+            { role: 'system', content: 'You are a helpful and accurate assistant.' },
             ...history.map(h => ({ role: h.role === 'user' ? 'user' : 'assistant', content: h.content })),
             { role: 'user', content: question }
           ],
@@ -452,7 +421,7 @@ Key Points: ${context.examPoints?.join(', ') || 'N/A'}
         });
         return response.choices[0].message.content;
       } catch (e) {
-        console.warn('[CHAT] Preferred OpenAI failed');
+        console.warn('[CHAT] Preferred OpenAI failed', summarizeProviderError(e));
       }
     }
 
@@ -476,7 +445,7 @@ Key Points: ${context.examPoints?.join(', ') || 'N/A'}
         const response = await openai.chat.completions.create({
           model: getChatOpenAIModel(),
           messages: [
-            { role: 'system', content: `You are an expert engineering tutor for topic ${topic}. Context: ${contextText}` },
+            { role: 'system', content: 'You are a helpful and accurate assistant.' },
             ...history.map(h => ({ role: h.role === 'user' ? 'user' : 'assistant', content: h.content })),
             { role: 'user', content: question }
           ],
@@ -484,7 +453,7 @@ Key Points: ${context.examPoints?.join(', ') || 'N/A'}
         });
         return response.choices[0].message.content;
       } catch (e) {
-        console.warn('[CHAT] Fallback OpenAI failed');
+        console.warn('[CHAT] Fallback OpenAI failed', summarizeProviderError(e));
       }
     }
 
