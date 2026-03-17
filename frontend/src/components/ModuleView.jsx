@@ -220,7 +220,7 @@ const ModuleView = () => {
           <FiArrowLeft /> Back
         </button>
         <div>
-          <h1>Module {module?.number}: {module?.title}</h1>
+          <h1>{module?.title?.startsWith('Module') ? module.title : `Module ${module?.number}: ${module?.title}`}</h1>
           {module?.description && <p className="module-description">{module.description}</p>}
         </div>
       </div>
@@ -285,7 +285,9 @@ const ModuleView = () => {
                     <span>By {material.uploadedBy.name}</span>
                   )}
                 </div>
-                {material.description && <p>{material.description}</p>}
+                {material.description && !material.description.includes('Imported from S3') && (
+                  <p>{material.description}</p>
+                )}
               </div>
               <button
                 onClick={() => handleDownload(material._id, material.fileName)}
