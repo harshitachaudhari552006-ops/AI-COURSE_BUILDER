@@ -97,5 +97,34 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
   }
 });
 
+// Link an S3 object as a question paper
+router.post('/s3/link', authenticate, async (req, res) => {
+  try {
+    const { subjectId, title, year, semester, examType, s3Key, fileSize } = req.body;
+
+    if (!subjectId || !title || !year || !semester || !s3Key) {
+      return res.status(400).json({ message: 'Subject ID, title, year, semester, and S3 Key are required' });
+    }
+
+    const paper = new QuestionPaper({
+      title,
+      year: parseInt(year),
+      semester: parseInt(semester),
+      subject: subjectId,
+      storageType: 'S3',
+      s3Key,
+      fileName: s3Key.split('/').pop(),
+      examType: examType || 'END_SEM',
+      uploadedBy: req.student ? req.student._id : req.user._id,
+    });
+
+    await paper.save();
+    res.status(201).json(paper);
+  } catch (error) {
+    console.error('Error linking S3 question paper:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
 

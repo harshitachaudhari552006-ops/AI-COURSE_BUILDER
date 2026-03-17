@@ -221,6 +221,12 @@ const ModuleView = () => {
         </button>
         <div>
           <h1>{module?.title?.startsWith('Module') ? module.title : `Module ${module?.number}: ${module?.title}`}</h1>
+          <div className="module-meta">
+            {module?.subject?.name && <span>{module.subject.name}</span>}
+            {module?.subject?.teacher?.name && (
+              <span className="teacher-tag">Teacher: {module.subject.teacher.name}</span>
+            )}
+          </div>
           {module?.description && <p className="module-description">{module.description}</p>}
         </div>
       </div>

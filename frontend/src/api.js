@@ -119,6 +119,24 @@ export const fetchMaterials = async (moduleId) => {
   }
 };
 
+export const fetchS3Objects = async () => {
+  try {
+    const res = await api.get('/materials/s3/list');
+    return res.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
+export const linkS3Object = async (data) => {
+  try {
+    const res = await api.post('/materials/s3/link', data);
+    return res.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
 export const downloadMaterial = async (id) => {
   try {
     const res = await api.get(`/materials/${id}/download`, {
@@ -145,6 +163,15 @@ export const downloadQuestionPaper = async (id) => {
     const res = await api.get(`/question-papers/${id}/download`, {
       responseType: 'blob',
     });
+    return res.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
+export const linkQuestionPaper = async (data) => {
+  try {
+    const res = await api.post('/question-papers/s3/link', data);
     return res.data;
   } catch (err) {
     handleError(err);

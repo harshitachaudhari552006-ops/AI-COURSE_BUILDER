@@ -23,7 +23,14 @@ router.get('/subject/:subjectId', authenticate, async (req, res) => {
 router.get('/:id', authenticate, async (req, res) => {
   try {
     const module = await Module.findById(req.params.id)
-      .populate('subject', 'code name')
+      .populate({
+        path: 'subject',
+        select: 'code name',
+        populate: {
+          path: 'teacher',
+          select: 'name email',
+        },
+      })
       .populate({
         path: 'materials',
         populate: {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchSemesters } from '../api';
-import { FiBook, FiLogOut, FiUser } from 'react-icons/fi';
+import { FiBook, FiLogOut, FiUser, FiBox } from 'react-icons/fi';
 
 const Home = () => {
   const { user, logout } = useAuth();
@@ -49,6 +49,13 @@ const Home = () => {
         <div className="header-content">
           <h1>🎓 AI Course Builder</h1>
           <div className="user-info">
+            <button 
+              onClick={() => navigate('/s3-notes')} 
+              className="btn btn-primary btn-sm"
+              style={{ marginRight: '10px' }}
+            >
+              <FiBox /> AWS Notes
+            </button>
             <FiUser /> {user?.name || user?.studentId}
             <button onClick={handleLogout} className="btn-icon">
               <FiLogOut /> Logout

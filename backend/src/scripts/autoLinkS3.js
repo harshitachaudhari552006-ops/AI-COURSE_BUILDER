@@ -47,12 +47,42 @@ const autoLinkS3 = async () => {
     const s3Objects = await listS3Objects();
     console.log(`Found ${s3Objects.length} total objects in S3.`);
 
+    // --- CLEANUP STEP ---
+    console.log('\n🧹 Cleaning up incorrectly linked question papers from materials...');
+    const incorrectMaterials = await Material.find({
+      $or: [
+        { s3Key: /question paper/i },
+        { s3Key: /QP/ },
+        { title: /question paper/i }
+      ]
+    });
+    
+    if (incorrectMaterials.length > 0) {
+      console.log(`Found ${incorrectMaterials.length} incorrect materials. Removing...`);
+      for (const mat of incorrectMaterials) {
+        // Remove from module's materials array
+        await Module.updateOne(
+          { _id: mat.module },
+          { $pull: { materials: mat._id } }
+        );
+        await Material.deleteOne({ _id: mat._id });
+        console.log(`  🗑️ Deleted: ${mat.title}`);
+      }
+    }
+
     let linkCount = 0;
 
     for (const obj of s3Objects) {
       if (obj.Size === 0) continue; // Skip folders
 
       const key = obj.Key; // e.g., "semester 6/DAV/Module 1/unit1.pdf"
+      
+      // SKIP QUESTION PAPERS
+      if (key.toLowerCase().includes('question paper') || key.toLowerCase().includes('/qp/')) {
+        console.log(`\n⏭️ Skipping question paper (should use paper selection): ${key}`);
+        continue;
+      }
+
       console.log(`\nProcessing: ${key}`);
 
       const parts = key.split('/');
@@ -77,12 +107,11 @@ const autoLinkS3 = async () => {
 
       // Extract Subject
       const subjectPart = parts[1].toUpperCase();
-      // Flexible matching for subjects
       const subjectMap = {
           'AM-III': 'EM3',
           'EM-3': 'EM3',
           'EM-4': 'EM4',
-          'DAV': 'DAV', // S3 DAV -> DB DAV
+          'DAV': 'DAV',
           'SAIDS': 'SAIDS'
       };
       
@@ -93,13 +122,12 @@ const autoLinkS3 = async () => {
       );
 
       if (!targetSubject) {
-        console.log(`  Skipping: subject ${subjectPart} (mapped to ${targetCode}) not found for semester ${semNum}`);
+        console.log(`  Skipping: subject ${subjectPart} not found for semester ${semNum}`);
         continue;
       }
 
       // Extract Module Number
-      // Search in all parts of the path for "Module X"
-      let moduleNum = 1; // Default
+      let moduleNum = null;
       let foundModule = false;
       for (const part of parts) {
           const moduleMatch = part.match(/Module\s*(\d+)/i);
@@ -112,12 +140,17 @@ const autoLinkS3 = async () => {
 
       const fileName = parts[parts.length - 1];
       if (!foundModule) {
-          // Check filename for module number if not found in folder name
           const moduleMatch = fileName.match(/Module\s*(\d+)/i);
           if (moduleMatch) {
               moduleNum = parseInt(moduleMatch[1]);
               foundModule = true;
           }
+      }
+
+      // IF NO MODULE FOUND AND NOT IN A MODULE FOLDER, SKIP (prevents dumping random files into Module 1)
+      if (!foundModule) {
+        console.log(`  Skipping: No module number identified for this file.`);
+        continue;
       }
 
       const targetModule = await Module.findOne({ 

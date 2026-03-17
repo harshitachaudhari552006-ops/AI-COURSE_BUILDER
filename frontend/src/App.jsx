@@ -5,6 +5,7 @@ import Home from './components/Home';
 import SemesterView from './components/SemesterView';
 import SubjectView from './components/SubjectView';
 import ModuleView from './components/ModuleView';
+import S3Explorer from './components/S3Explorer';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -49,6 +50,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ModuleView />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/s3-notes"
+        element={
+          <PrivateRoute>
+            <S3Explorer />
           </PrivateRoute>
         }
       />
