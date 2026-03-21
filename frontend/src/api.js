@@ -13,13 +13,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle errors – show clear message when backend is unreachable
+// Handle errors – show clear message based on environment
 function handleError(err) {
+  const isProduction = window.location.hostname !== 'localhost';
+
   if (err.response?.data?.message) {
     throw new Error(err.response.data.message);
   }
+
   if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
-    throw new Error('Cannot connect to server. Start the backend: cd backend && npm run dev');
+    if (isProduction) {
+      throw new Error('Server unreachable. Please ensure the backend service is running and VITE_API_URL is configured in Render Settings.');
+    } else {
+      throw new Error('Cannot connect to local server. Start the backend: cd backend && npm run dev');
+    }
   }
   throw new Error(err.message || 'Request failed');
 }
