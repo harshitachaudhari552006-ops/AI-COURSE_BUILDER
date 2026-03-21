@@ -130,11 +130,15 @@ const robustGenerateContent = async (feature, prompt, fallbackContent) => {
   if (primaryGemini) {
     for (const modelName of models) {
       try {
-        const model = primaryGemini.getGenerativeModel({ model: modelName });
+        const config = { model: modelName };
+        if (modelName.includes('1.5') || modelName.includes('2.0')) {
+          config.tools = [{ googleSearchRetrieval: {} }];
+        }
+        const model = primaryGemini.getGenerativeModel(config);
         const result = await model.generateContent(prompt);
         if (result.response) return result.response.text();
       } catch (e) {
-        console.warn(`[RESCUE] Primary key failed with ${modelName}`);
+        console.warn(`[RESCUE] Primary key failed with ${modelName}: ${e.message}`);
       }
     }
   }
@@ -395,15 +399,13 @@ export const chatWithAI = async (moduleId, topic, question, history = []) => {
     const backupGemini = contentGeminiClient;
     const openai = chatOpenAIClient || contentOpenAIClient;
 
-    const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro'];
+    const models = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-1.0-pro', 'gemini-pro'];
     const formattedHistory = formatGeminiHistory(history);
 
-    const prompt = `You are a helpful and accurate assistant. Answer the user's question clearly and conversationally.
-
-Topic: ${topic}
-Question: ${question}
-
-Use Markdown formatting for clarity when helpful.`;
+    const prompt = `You are a versatile and intelligent AI assistant. 
+You can answer ANY question correctly, including general knowledge, technical engineering queries, or daily tasks.
+Even if the current course topic is "${topic}", you should prioritize answering the user's specific question: "${question}" using all available information.
+Format your response clearly using Markdown.`;
 
     const preferred = process.env.PREFERRED_AI_PROVIDER || 'GEMINI';
 
@@ -421,7 +423,7 @@ Use Markdown formatting for clarity when helpful.`;
         });
         return response.choices[0].message.content;
       } catch (e) {
-        console.warn('[CHAT] Preferred OpenAI failed', summarizeProviderError(e));
+        console.warn('[CHAT] Preferred OpenAI failed', e.message);
       }
     }
 
@@ -429,7 +431,11 @@ Use Markdown formatting for clarity when helpful.`;
     if (primaryGemini) {
       for (const modelName of models) {
         try {
-          const model = primaryGemini.getGenerativeModel({ model: modelName });
+          const config = { model: modelName };
+          if (modelName.includes('1.5') || modelName.includes('2.0')) {
+            config.tools = [{ googleSearchRetrieval: {} }];
+          }
+          const model = primaryGemini.getGenerativeModel(config);
           const chat = model.startChat({ history: formattedHistory });
           const result = await chat.sendMessage(prompt);
           if (result.response) return result.response.text();
@@ -461,7 +467,11 @@ Use Markdown formatting for clarity when helpful.`;
     if (backupGemini && backupGemini !== primaryGemini) {
       for (const modelName of models) {
         try {
-          const model = backupGemini.getGenerativeModel({ model: modelName });
+          const config = { model: modelName };
+          if (modelName.includes('1.5') || modelName.includes('2.0')) {
+            config.tools = [{ googleSearchRetrieval: {} }];
+          }
+          const model = backupGemini.getGenerativeModel(config);
           const chat = model.startChat({ history: formattedHistory });
           const result = await chat.sendMessage(prompt);
           if (result.response) return result.response.text();

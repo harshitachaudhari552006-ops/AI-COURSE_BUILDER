@@ -39,6 +39,14 @@ const subjectSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  meetingLink: {
+    type: String,
+    default: '',
+  },
+  isMeetingLive: {
+    type: Boolean,
+    default: false,
+  },
 }, {
   timestamps: true,
 });

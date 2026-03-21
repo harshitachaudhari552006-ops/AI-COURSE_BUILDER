@@ -5,32 +5,59 @@ import { generateOTP, sendOTPEmail, sendOTPSMS } from '../services/otpService.js
 
 const router = express.Router();
 
+// Register new student
+router.post('/register', async (req, res) => {
+  try {
+    const { studentId, name, email, mobile, semester, department } = req.body;
+
+    if (!studentId || !name || !email || !semester || !department) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Check if student already exists
+    const existingStudent = await Student.findOne({ 
+      $or: [{ studentId }, { email }, { mobile }] 
+    });
+
+    if (existingStudent) {
+      return res.status(400).json({ message: 'Student with this ID, Email or Mobile already exists' });
+    }
+
+    const student = new Student({
+      studentId,
+      name,
+      email,
+      mobile,
+      semester,
+      department
+    });
+
+    await student.save();
+
+    res.status(201).json({ 
+      message: 'Registration successful. You can now login.',
+      student: { studentId: student.studentId, name: student.name }
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Server error during registration' });
+  }
+});
+
 // Request OTP
 router.post('/request-otp', async (req, res) => {
   try {
-    const { studentId, email, mobile } = req.body;
+    const { studentId } = req.body;
 
-    if (!studentId || (!email && !mobile)) {
-      return res.status(400).json({ message: 'Student ID and Email or Mobile required' });
+    if (!studentId) {
+      return res.status(400).json({ message: 'Student ID required' });
     }
 
-    // Find or create student
-    let student = await Student.findOne({ studentId });
+    // Find student (must exist now)
+    const student = await Student.findOne({ studentId });
     
     if (!student) {
-      // Create new student (first time login)
-      student = new Student({
-        studentId,
-        email: email || '',
-        mobile: mobile || '',
-        name: studentId, // Default name, can be updated later
-        semester: 1, // Default, can be updated
-        department: 'Engineering', // Default
-      });
-    } else {
-      // Update email/mobile if provided
-      if (email) student.email = email;
-      if (mobile) student.mobile = mobile;
+      return res.status(404).json({ message: 'Student not found. Please register first.' });
     }
 
     // Decide whether to use fixed OTP (dev) or random OTP (prod)
@@ -60,11 +87,11 @@ router.post('/request-otp', async (req, res) => {
 
     // Normal mode: send OTP via email/SMS
     let sent = false;
-    if (email) {
-      sent = await sendOTPEmail(email, otp, student.name);
+    if (student.email) {
+      sent = await sendOTPEmail(student.email, otp, student.name);
     }
-    if (mobile && !sent) {
-      sent = await sendOTPSMS(mobile, otp);
+    if (student.mobile && !sent) {
+      sent = await sendOTPSMS(student.mobile, otp);
     }
 
     if (!sent) {

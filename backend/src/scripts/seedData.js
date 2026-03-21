@@ -42,18 +42,23 @@ const seedData = async () => {
 
     console.log('✅ Teachers created');
 
-    // Create Semesters
+    // Create Semesters for both Syllabus Types
+    const syllabusTypes = ['2019-C', 'NEP 2020'];
     const semesters = [];
-    for (let i = 1; i <= 8; i++) {
-      const semester = await Semester.create({
-        number: i,
-        name: `Semester ${i}`,
-        isActive: true,
-      });
-      semesters.push(semester);
+
+    for (const syllabus of syllabusTypes) {
+      for (let i = 1; i <= 8; i++) {
+        const semester = await Semester.create({
+          number: i,
+          syllabusType: syllabus,
+          name: `${syllabus} - Semester ${i}`,
+          isActive: true,
+        });
+        semesters.push(semester);
+      }
     }
 
-    console.log('✅ Semesters created');
+    console.log(`✅ ${semesters.length} Semesters created across ${syllabusTypes.length} syllabus types`);
 
     // Create Subjects for Semester 1 (Example)
     const semester1 = semesters[0];

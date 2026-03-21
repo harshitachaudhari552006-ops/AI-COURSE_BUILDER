@@ -8,7 +8,7 @@ const materialSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['PDF', 'PPT', 'TEXT', 'VIDEO'],
+    enum: ['PDF', 'PPT', 'TEXT', 'VIDEO', 'EXTRA_NOTES', 'RESEARCH_PAPER'],
     required: true,
   },
   filePath: {

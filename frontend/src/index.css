@@ -266,6 +266,62 @@ code {
   opacity: 0.9;
 }
 
+.syllabus-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.syllabus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.syllabus-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow);
+  border: 2px solid transparent;
+}
+
+.syllabus-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.syllabus-icon {
+  font-size: 64px;
+  color: var(--primary);
+  margin-bottom: 24px;
+}
+
+.syllabus-card h3 {
+  font-size: 28px;
+  color: var(--dark);
+  margin-bottom: 12px;
+}
+
+.syllabus-card p {
+  color: var(--gray);
+  font-size: 16px;
+}
+
+.btn-secondary {
+  background: var(--light);
+  color: var(--dark);
+  margin-top: 20px;
+}
+
 .semesters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -889,4 +945,60 @@ code {
   justify-content: flex-end;
   gap: 12px;
   margin-top: 30px;
+}
+
+/* Live Class Button */
+.live-pulse-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ff4757;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 15px;
+  box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+  animation: pulse-red 2s infinite;
+  transition: all 0.3s ease;
+}
+
+.live-pulse-btn:hover {
+  background: #ff6b81;
+  transform: scale(1.05);
+}
+
+@keyframes pulse-red {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+  }
+}
+
+/* Live Class Modal */
+.live-modal {
+  max-width: 1100px !important;
+  width: 95% !important;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px !important;
+}
+
+.live-iframe-wrapper {
+  flex: 1;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }

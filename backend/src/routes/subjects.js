@@ -7,6 +7,21 @@ import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Get all live classes (meeting status)
+router.get('/live', authenticate, async (req, res) => {
+  try {
+    const liveSubjects = await Subject.find({
+      isMeetingLive: true,
+      isActive: true,
+    }).populate('teacher', 'name email').populate('semester', 'number name');
+
+    res.json(liveSubjects);
+  } catch (error) {
+    console.error('Error fetching live classes:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get subjects by semester
 router.get('/semester/:semesterId', authenticate, async (req, res) => {
   try {
@@ -46,6 +61,32 @@ router.get('/:id', authenticate, async (req, res) => {
     res.json(subject);
   } catch (error) {
     console.error('Error fetching subject:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update meeting status for a subject (Teachers/Admins)
+router.put('/:id/meeting', authenticate, async (req, res) => {
+  try {
+    const { meetingLink, isMeetingLive } = req.body;
+    
+    const subject = await Subject.findByIdAndUpdate(
+      req.params.id,
+      { meetingLink, isMeetingLive },
+      { new: true }
+    );
+
+    if (!subject) {
+      return res.status(404).json({ message: 'Subject not found' });
+    }
+
+    res.json({ 
+      message: 'Meeting status updated successfully',
+      meetingLink: subject.meetingLink,
+      isMeetingLive: subject.isMeetingLive
+    });
+  } catch (error) {
+    console.error('Error updating meeting status:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

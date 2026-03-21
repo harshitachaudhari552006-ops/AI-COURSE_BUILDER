@@ -5,10 +5,16 @@ import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Get all semesters
+// Get semesters, optionally filtered by syllabus type
 router.get('/', authenticate, async (req, res) => {
   try {
-    const semesters = await Semester.find({ isActive: true })
+    const { syllabusType } = req.query;
+    const query = { isActive: true };
+    if (syllabusType) {
+      query.syllabusType = syllabusType;
+    }
+
+    const semesters = await Semester.find(query)
       .sort({ number: 1 })
       .lean();
 

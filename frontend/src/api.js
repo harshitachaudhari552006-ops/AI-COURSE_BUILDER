@@ -25,6 +25,15 @@ function handleError(err) {
 }
 
 // Auth APIs
+export const registerStudent = async (data) => {
+  try {
+    const res = await api.post('/auth/register', data);
+    return res.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
 export const requestOTP = async (data) => {
   try {
     const res = await api.post('/auth/request-otp', data);
@@ -44,9 +53,20 @@ export const verifyOTP = async (data) => {
 };
 
 // Semester APIs
-export const fetchSemesters = async () => {
+export const fetchSemesters = async (syllabusType = null) => {
   try {
-    const res = await api.get('/semesters');
+    const params = {};
+    if (syllabusType) params.syllabusType = syllabusType;
+    const res = await api.get('/semesters', { params });
+    return res.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
+export const fetchLiveClasses = async () => {
+  try {
+    const res = await api.get('/subjects/live');
     return res.data;
   } catch (err) {
     handleError(err);
@@ -109,6 +129,15 @@ export const updateModuleYouTubeLinks = async (id, youtubeUrls) => {
   }
 };
 
+export const updateModuleNPTELUrls = async (id, nptelUrls) => {
+  try {
+    const res = await api.put(`/modules/${id}/nptel-links`, { nptelUrls });
+    return res.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
 // Material APIs
 export const fetchMaterials = async (moduleId) => {
   try {
@@ -141,6 +170,19 @@ export const downloadMaterial = async (id) => {
   try {
     const res = await api.get(`/materials/${id}/download`, {
       responseType: 'blob',
+    });
+    return res.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
+export const uploadMaterial = async (formData) => {
+  try {
+    const res = await api.post('/materials/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return res.data;
   } catch (err) {

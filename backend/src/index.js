@@ -34,8 +34,24 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "frame-src": ["'self'", "https://www.youtube.com", "https://youtube.com"],
-      "img-src": ["'self'", "data:", "https://i.ytimg.com", "https://s.ytimg.com", "https://*.amazonaws.com"],
+      "frame-src": [
+        "'self'", 
+        "https://www.youtube.com", 
+        "https://youtube.com", 
+        "https://drive.google.com", 
+        "https://docs.google.com",
+        "https://share.google",
+        "https://photos.google.com"
+      ],
+      "img-src": [
+        "'self'", 
+        "data:", 
+        "https://i.ytimg.com", 
+        "https://s.ytimg.com", 
+        "https://*.amazonaws.com",
+        "https://drive.google.com",
+        "https://photos.google.com"
+      ],
       "script-src": ["'self'", "'unsafe-inline'", "https://www.youtube.com", "https://s.ytimg.com"],
     },
   },

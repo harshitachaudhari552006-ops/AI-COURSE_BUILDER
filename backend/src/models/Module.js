@@ -31,6 +31,10 @@ const moduleSchema = new mongoose.Schema({
     type: String,
     trim: true,
   }],
+  nptelUrls: [{
+    type: String,
+    trim: true,
+  }],
 }, {
   timestamps: true,
 });

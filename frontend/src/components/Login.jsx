@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { requestOTP, verifyOTP } from '../api';
 import { FiMail, FiPhone, FiLock, FiUser } from 'react-icons/fi';
@@ -80,34 +81,13 @@ const Login = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label>
-                <FiMail /> Email
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>
-                <FiPhone /> Mobile
-              </label>
-              <input
-                type="tel"
-                value={formData.mobile}
-                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                placeholder="Enter your mobile number"
-              />
-            </div>
-
             <button type="submit" disabled={loading} className="btn btn-primary">
               {loading ? 'Sending OTP...' : 'Request OTP'}
             </button>
+
+            <p style={{ textAlign: 'center', marginTop: '20px' }}>
+              New user? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Register Now</Link>
+            </p>
           </form>
         ) : (
           <form onSubmit={handleVerifyOTP} className="login-form">
