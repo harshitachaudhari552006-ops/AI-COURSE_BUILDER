@@ -41,7 +41,9 @@ app.use(helmet({
         "https://drive.google.com", 
         "https://docs.google.com",
         "https://share.google",
-        "https://photos.google.com"
+        "https://photos.google.com",
+        "https://meet.jit.si",
+        "https://8x8.vc"
       ],
       "img-src": [
         "'self'", 
@@ -50,9 +52,41 @@ app.use(helmet({
         "https://s.ytimg.com", 
         "https://*.amazonaws.com",
         "https://drive.google.com",
-        "https://photos.google.com"
+        "https://photos.google.com",
+        "https://meet.jit.si"
       ],
-      "script-src": ["'self'", "'unsafe-inline'", "https://www.youtube.com", "https://s.ytimg.com"],
+      "script-src": [
+        "'self'", 
+        "'unsafe-inline'", 
+        "'unsafe-eval'",
+        "https://www.youtube.com", 
+        "https://s.ytimg.com",
+        "https://meet.jit.si"
+      ],
+      "connect-src": [
+        "'self'",
+        "https://meet.jit.si",
+        "https://8x8.vc",
+        "wss://meet.jit.si",
+        "https://*.amazonaws.com"
+      ],
+      "media-src": [
+        "'self'",
+        "https://meet.jit.si",
+        "https://8x8.vc",
+        "blob:"
+      ],
+      "style-src": [
+        "'self'",
+        "'unsafe-inline'",
+        "https://meet.jit.si",
+        "https://fonts.googleapis.com"
+      ],
+      "font-src": [
+        "'self'",
+        "https://fonts.gstatic.com",
+        "data:"
+      ]
     },
   },
   referrerPolicy: { policy: "strict-origin-when-cross-origin" }
